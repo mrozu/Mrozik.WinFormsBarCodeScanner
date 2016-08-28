@@ -45,6 +45,7 @@
             this.switchCameraButton.TabIndex = 3;
             this.switchCameraButton.Text = "Switch camera";
             this.switchCameraButton.UseVisualStyleBackColor = true;
+            this.switchCameraButton.Visible = false;
             this.switchCameraButton.Click += new System.EventHandler(this.switchCameraButton_Click);
             // 
             // loadingPictureBox
