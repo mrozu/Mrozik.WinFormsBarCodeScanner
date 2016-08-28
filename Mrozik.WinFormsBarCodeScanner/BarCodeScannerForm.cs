@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Emgu.CV;
+using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
 
 namespace Mrozik.WinFormsBarCodeScanner
 {
@@ -18,7 +21,7 @@ namespace Mrozik.WinFormsBarCodeScanner
         protected override void OnShown(EventArgs e)
         {
             try
-            {   
+            {
                 Task.Run(() =>
                 {
                     ShowBusyIndicator();
@@ -59,7 +62,8 @@ namespace Mrozik.WinFormsBarCodeScanner
             if (_capture == null) return;
 
             var imageframe = _capture.QueryFrame();
-            cameraViewer.Image = imageframe;
+            var image = imageframe.ToImage<Rgb, byte>().Rotate(90, new Rgb(Color.Transparent));
+            cameraViewer.Image = image;
         }
 
         private void switchCameraButton_Click(object sender, EventArgs e)
@@ -68,11 +72,19 @@ namespace Mrozik.WinFormsBarCodeScanner
 
             Task.Run(() =>
             {
-                ShowBusyIndicator();
-                _capture.Dispose();
-                _capture = null;
-                _capture = new Capture(_currentCameraIndex);
-                HideBusyIndicator();
+                try
+                {
+                    ShowBusyIndicator();
+                    _capture.Dispose();
+                    _capture = null;
+                    _capture = new Capture(_currentCameraIndex);
+                    HideBusyIndicator();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                    throw;
+                }
             });
         }
     }

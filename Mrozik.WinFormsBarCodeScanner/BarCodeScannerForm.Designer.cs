@@ -44,6 +44,7 @@
             this.cameraViewer.Location = new System.Drawing.Point(10, 54);
             this.cameraViewer.Name = "cameraViewer";
             this.cameraViewer.Size = new System.Drawing.Size(313, 309);
+            this.cameraViewer.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.cameraViewer.TabIndex = 2;
             this.cameraViewer.TabStop = false;
             // 
@@ -80,7 +81,9 @@
             this.Controls.Add(this.switchCameraButton);
             this.Name = "BarCodeScannerForm";
             this.Padding = new System.Windows.Forms.Padding(10);
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "BarCodeScannerForm";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             ((System.ComponentModel.ISupportInitialize)(this.cameraViewer)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.loadingPictureBox)).EndInit();
             this.ResumeLayout(false);
