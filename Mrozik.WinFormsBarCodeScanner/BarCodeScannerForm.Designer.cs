@@ -32,6 +32,7 @@
             this.cameraViewer = new Emgu.CV.UI.ImageBox();
             this.switchCameraButton = new System.Windows.Forms.Button();
             this.loadingPictureBox = new System.Windows.Forms.PictureBox();
+            this.recognizedBarCode = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.cameraViewer)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.loadingPictureBox)).BeginInit();
             this.SuspendLayout();
@@ -43,7 +44,7 @@
             this.cameraViewer.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.Minimum;
             this.cameraViewer.Location = new System.Drawing.Point(10, 54);
             this.cameraViewer.Name = "cameraViewer";
-            this.cameraViewer.Size = new System.Drawing.Size(313, 309);
+            this.cameraViewer.Size = new System.Drawing.Size(313, 447);
             this.cameraViewer.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.cameraViewer.TabIndex = 2;
             this.cameraViewer.TabStop = false;
@@ -66,17 +67,29 @@
             this.loadingPictureBox.InitialImage = null;
             this.loadingPictureBox.Location = new System.Drawing.Point(10, 54);
             this.loadingPictureBox.Name = "loadingPictureBox";
-            this.loadingPictureBox.Size = new System.Drawing.Size(313, 309);
+            this.loadingPictureBox.Size = new System.Drawing.Size(313, 419);
             this.loadingPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.loadingPictureBox.TabIndex = 4;
             this.loadingPictureBox.TabStop = false;
+            // 
+            // recognizedBarCode
+            // 
+            this.recognizedBarCode.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.recognizedBarCode.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.recognizedBarCode.Location = new System.Drawing.Point(10, 473);
+            this.recognizedBarCode.Name = "recognizedBarCode";
+            this.recognizedBarCode.Size = new System.Drawing.Size(313, 28);
+            this.recognizedBarCode.TabIndex = 5;
+            this.recognizedBarCode.Text = "(barcode)";
+            this.recognizedBarCode.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // BarCodeScannerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(333, 373);
+            this.ClientSize = new System.Drawing.Size(333, 511);
             this.Controls.Add(this.loadingPictureBox);
+            this.Controls.Add(this.recognizedBarCode);
             this.Controls.Add(this.cameraViewer);
             this.Controls.Add(this.switchCameraButton);
             this.Name = "BarCodeScannerForm";
@@ -95,6 +108,7 @@
         private Emgu.CV.UI.ImageBox cameraViewer;
         private System.Windows.Forms.Button switchCameraButton;
         private System.Windows.Forms.PictureBox loadingPictureBox;
+        private System.Windows.Forms.Label recognizedBarCode;
     }
 }
 

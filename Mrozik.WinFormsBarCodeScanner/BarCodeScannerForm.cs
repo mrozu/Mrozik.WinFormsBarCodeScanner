@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
+using ZXing;
 
 namespace Mrozik.WinFormsBarCodeScanner
 {
@@ -12,6 +14,7 @@ namespace Mrozik.WinFormsBarCodeScanner
     {
         private Capture _capture;
         private int _currentCameraIndex = 1;
+        private IBarcodeReader _barcodeReader;
 
         public BarCodeScannerForm()
         {
@@ -26,6 +29,8 @@ namespace Mrozik.WinFormsBarCodeScanner
                 {
                     ShowBusyIndicator();
                     _capture = new Capture(_currentCameraIndex);
+                    _barcodeReader = new BarcodeReader();
+
                     HideBusyIndicator();
                 });
 
@@ -63,7 +68,32 @@ namespace Mrozik.WinFormsBarCodeScanner
 
             var imageframe = _capture.QueryFrame();
             var image = imageframe.ToImage<Rgb, byte>().Rotate(90, new Rgb(Color.Transparent));
-            cameraViewer.Image = image;
+            Task.Run(() =>
+            {
+                var result = _barcodeReader.Decode(image.ToBitmap());
+                if (result != null)
+                {
+                    SetRecognizedBarcode(result.Text);
+                    image.DrawPolyline(result.ResultPoints.Select(p => new Point((int)p.X, (int)p.Y)).ToArray(), true, new Rgb(Color.Red), 3);
+                }
+                cameraViewer.Image = image;
+            });
+        }
+
+        private void SetRecognizedBarcode(string text)
+        {
+            if (recognizedBarCode.InvokeRequired)
+            {
+                recognizedBarCode.Invoke((MethodInvoker)delegate
+               {
+                   SetRecognizedBarcode(text);
+
+               });
+            }
+            else
+            {
+                recognizedBarCode.Text = text;
+            }
         }
 
         private void switchCameraButton_Click(object sender, EventArgs e)
