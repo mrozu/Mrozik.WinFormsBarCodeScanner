@@ -42,7 +42,7 @@ namespace Mrozik.WinFormsBarCodeScanner
             try
             {
                 ShowBusyIndicator();
-                Task.Run(() =>
+                Task.Factory.StartNew(() =>
                 {
                     _videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
                     ConnectToVideoDevice();
