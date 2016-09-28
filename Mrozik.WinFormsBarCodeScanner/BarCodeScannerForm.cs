@@ -1,111 +1,52 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using AForge.Video;
 using AForge.Video.DirectShow;
 using ZXing;
-using ZXing.Common;
-using ZXing.Common.Detector;
 
 namespace Mrozik.WinFormsBarCodeScanner
 {
-    public partial class BarCodeScannerForm : Form
+    internal partial class BarCodeScannerForm : Form
     {
-        private int _currentCameraIndex = 1;
-        private readonly IBarcodeReader _barcodeReader;
+        private const int CurrentCameraIndex = 1;
+        private readonly Code39BarcodeReader _barcodeReader = new Code39BarcodeReader();
         private VideoCaptureDevice _videoDevice;
-        private FilterInfoCollection _videoDevices;
         private Bitmap _oldImage;
-        private string _barcode;
+        private string _previouslyRecognizedBarcode;
         private int _sameBarcodeRepeatTime;
+
+        public string RecognizedCode { get; private set; }
 
         public BarCodeScannerForm()
         {
             InitializeComponent();
-            _barcodeReader = new BarcodeReader
-            {
-                Options =
-                {
-                    PossibleFormats = new List<BarcodeFormat>
-                    {
-                        BarcodeFormat.CODE_39
-                    },
-
-                }
-            };
         }
 
         protected override void OnShown(EventArgs e)
         {
-            try
-            {
-                ShowBusyIndicator();
-                Task.Factory.StartNew(() =>
-                {
-                    _videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
-                    ConnectToVideoDevice();
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-        }
-
-        private static void DrawBarcodeRectangle(Bitmap bitmap, Result result)
-        {
-            var barcodeRectangle = FindBarcodeRectangle(bitmap, result);
-
-            using (var g = Graphics.FromImage(bitmap))
-            {
-                using (var pen = new Pen(Color.Red, 2))
-                {
-                    g.DrawRectangle(pen, barcodeRectangle);
-                }
-            }
-        }
-
-        private static Rectangle FindBarcodeRectangle(Bitmap bitmap, Result result)
-        {
-            var startX = result.ResultPoints[0].X;
-            float startY;
-
-            var width = result.ResultPoints[1].X - result.ResultPoints[0].X;
-            float height;
-
-
-            var luminanceSource = new BitmapLuminanceSource(bitmap);
-            var binarizer = new HybridBinarizer(luminanceSource);
-            var bitMatrix = binarizer.BlackMatrix;
-            var whiteRectangleDetector = WhiteRectangleDetector.Create(bitMatrix);
-            var whiteRectanblePoints = whiteRectangleDetector.detect();
-            if (whiteRectanblePoints != null)
-            {
-                height = whiteRectanblePoints[3].Y - whiteRectanblePoints[0].Y;
-                startY = whiteRectanblePoints[0].Y;
-            }
-            else
-            {
-                height = 1;
-                startY = result.ResultPoints[0].Y;
-            }
-
-            var barcodeRectangle = new Rectangle((int)startX, (int)startY, (int)width, (int)height);
-            return barcodeRectangle;
+            ShowBusyIndicator();
+            Task.Factory.StartNew(ConnectToVideoDevice);
         }
 
         private void ConnectToVideoDevice()
         {
-            _videoDevice = new VideoCaptureDevice(_videoDevices[_currentCameraIndex].MonikerString);
-            _videoDevice.VideoResolution = _videoDevice.VideoCapabilities[2];
-            _videoDevice.NewFrame += VideoDevice_NewFrame;
+            var videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
+            if (videoDevices.Count == 0)
+            {
+                CloseWithError("No video device found.");
+            }
+            else
+            {
+                _videoDevice = new VideoCaptureDevice(videoDevices[CurrentCameraIndex].MonikerString);
+                _videoDevice.VideoResolution = _videoDevice.VideoCapabilities[2];
+                _videoDevice.NewFrame += VideoDevice_NewFrame;
 
-            _videoDevice.Start();
+                _videoDevice.Start();
+            }
         }
-
-
+        
         private void VideoDevice_NewFrame(object sender, NewFrameEventArgs eventArgs)
         {
             try
@@ -117,11 +58,11 @@ namespace Mrozik.WinFormsBarCodeScanner
                 currentImage = (Bitmap)currentImage.Clone();
                 currentImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-                var result = _barcodeReader.Decode(currentImage);
-                if (result != null)
+                var recognitionResult = _barcodeReader.Decode(currentImage);
+                if (recognitionResult != null)
                 {
-                    DrawBarcodeRectangle(currentImage, result);
-                    SetRecognizedBarcode(result.Text);
+                    _barcodeReader.DrawResultRectangle(currentImage, recognitionResult.ResultPoints);
+                    SetRecognizedBarcode(recognitionResult.Text);
                 }
                 HideBusyIndicator();
                 pictureBox.Image = currentImage;
@@ -131,19 +72,8 @@ namespace Mrozik.WinFormsBarCodeScanner
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
-                throw;
+                CloseWithError(ex.Message);
             }
-        }
-
-        private void HideBusyIndicator()
-        {
-            loadingPictureBox.Visible = false;
-        }
-
-        private void ShowBusyIndicator()
-        {
-            loadingPictureBox.Visible = true;
         }
 
         protected override void OnClosed(EventArgs e)
@@ -162,33 +92,59 @@ namespace Mrozik.WinFormsBarCodeScanner
             }
         }
 
-        private void SetRecognizedBarcode(string text)
+        private void SetRecognizedBarcode(string recognizedBarcode)
         {
             if (InvokeRequired)
             {
                 Invoke((MethodInvoker)delegate
                {
-                   SetRecognizedBarcode(text);
+                   SetRecognizedBarcode(recognizedBarcode);
                });
             }
             else
             {
-                if (_barcode == text)
+                if (_previouslyRecognizedBarcode == recognizedBarcode)
                 {
                     _sameBarcodeRepeatTime++;
                 }
                 else
                 {
                     _sameBarcodeRepeatTime = 0;
-                    _barcode = text;
+                    _previouslyRecognizedBarcode = recognizedBarcode;
                 }
 
                 if (_sameBarcodeRepeatTime >= 5)
                 {
-                    _videoDevice.NewFrame -= VideoDevice_NewFrame;
-                    MessageBox.Show(text);
-                    _videoDevice.NewFrame += VideoDevice_NewFrame;
+                    RecognizedCode = recognizedBarcode;
+                    DialogResult = DialogResult.OK;
+                    Close();
                 }
+            }
+        }
+
+        private void HideBusyIndicator()
+        {
+            loadingPictureBox.Visible = false;
+        }
+
+        private void ShowBusyIndicator()
+        {
+            loadingPictureBox.Visible = true;
+        }
+
+        private void CloseWithError(string message)
+        {
+            if (InvokeRequired)
+            {
+                Invoke((MethodInvoker) delegate
+                {
+                    CloseWithError(message);
+                });
+            }
+            else
+            {
+                MessageBox.Show(message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Close();
             }
         }
     }

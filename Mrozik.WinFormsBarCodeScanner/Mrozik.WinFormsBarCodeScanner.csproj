@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{D11CDBD0-DD8A-48B0-8035-E502CA38D40F}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Mrozik.WinFormsBarCodeScanner</RootNamespace>
     <AssemblyName>Mrozik.WinFormsBarCodeScanner</AssemblyName>
@@ -34,6 +34,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AForge, Version=2.2.5.0, Culture=neutral, PublicKeyToken=c1db6ff4eaa06aeb, processorArchitecture=MSIL">
@@ -81,20 +84,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BarCodeScanner.cs" />
     <Compile Include="BarCodeScannerForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="BarCodeScannerForm.Designer.cs">
       <DependentUpon>BarCodeScannerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Program.cs" />
+    <Compile Include="Code39BarcodeReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RecognizedBarCode.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="RecognizedBarCode.Designer.cs">
-      <DependentUpon>RecognizedBarCode.cs</DependentUpon>
-    </Compile>
     <EmbeddedResource Include="BarCodeScannerForm.resx">
       <DependentUpon>BarCodeScannerForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -108,9 +106,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="RecognizedBarCode.resx">
-      <DependentUpon>RecognizedBarCode.cs</DependentUpon>
-    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

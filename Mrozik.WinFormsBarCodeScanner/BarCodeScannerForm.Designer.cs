@@ -63,10 +63,12 @@
             this.ClientSize = new System.Drawing.Size(333, 511);
             this.Controls.Add(this.loadingPictureBox);
             this.Controls.Add(this.pictureBox);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "BarCodeScannerForm";
             this.Padding = new System.Windows.Forms.Padding(10);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "BarCodeScannerForm";
             ((System.ComponentModel.ISupportInitialize)(this.loadingPictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
             this.ResumeLayout(false);
